@@ -25,11 +25,11 @@ def main():
         # Define the output pattern for frame images (e.g., frame_0001.jpg, frame_0002.jpg, ...)
         output_pattern = os.path.join(temp_dir, "frame_%04d.jpg")
         
-        # FFmpeg command to extract frames
+        # FFmpeg command to extract frames 4 times per second
         command = [
             "ffmpeg",
             "-i", input_file,    # Input video
-            "-vf", "fps=1",      # Extract one frame per second
+            "-vf", "fps=4",      # Extract 4 frames per second
             output_pattern       # Output frames to temporary directory
         ]
         
@@ -45,6 +45,13 @@ def main():
             # Initialize the OpenCV window
             cv2.namedWindow("Frame Viewer", cv2.WINDOW_NORMAL)
             
+            # Function to convert seconds to HH:MM:SS format
+            def seconds_to_hms(seconds):
+                hours = seconds // 3600
+                minutes = (seconds % 3600) // 60
+                secs = seconds % 60
+                return f"{int(hours):02}:{int(minutes):02}:{secs:06.3f}"  # Include milliseconds
+
             # Function to display the current frame with frame number and total frames overlay
             def show_frame(frame_index):
                 if 0 <= frame_index < len(frame_files):
@@ -89,6 +96,9 @@ def main():
                     current_frame = min(current_frame + 1, len(frame_files) - 1)  # Move 1 frame forward
                     show_frame(current_frame)
                     cv2.setTrackbarPos("Frame", "Frame Viewer", current_frame)  # Update slider
+                elif key == ord(' '):  # Spacebar to print the current frame's timestamp
+                    timestamp = seconds_to_hms(current_frame / 4)  # Divide by 4 since there are 4 frames per second
+                    print(f"Current frame timestamp (FFmpeg format): {timestamp}")
             
             # Close the OpenCV window
             cv2.destroyAllWindows()
