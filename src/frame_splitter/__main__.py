@@ -47,11 +47,20 @@ def main():
             # Track the current frame index
             current_frame = 0
             
-            # Function to display the current frame
+            # Function to display the current frame with frame number overlay
             def show_frame(frame_index):
                 if 0 <= frame_index < len(frame_files):
                     frame_path = os.path.join(temp_dir, frame_files[frame_index])
                     image = cv2.imread(frame_path)
+
+                    # Overlay the current frame number on the image
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    text = f"Frame: {frame_index + 1}"
+                    color = (0, 255, 0)  # Green color
+                    thickness = 2
+                    position = (30, 30)  # Position to place the text
+                    image = cv2.putText(image, text, position, font, 1, color, thickness, lineType=cv2.LINE_AA)
+                    
                     cv2.imshow("Frame Viewer", image)
                 else:
                     print("Invalid frame index.")
