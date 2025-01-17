@@ -1,15 +1,18 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "frame_analysis"
 version = "0.1"
-dependencies = []
+dependencies = [
+  "opencv-python==4.11.0.86"
+]
 
 [project.scripts]
 run_frames = "frame_splitter.__main__:main"
+grab_frame = "frame_grabber.__main__:main"
 
-# [tool.setuptools.packages.find]
-# where = ["src"]
+[tool.setuptools.packages.find]
+where = ["src"]
 
