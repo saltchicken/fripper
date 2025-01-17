@@ -40,22 +40,20 @@ def main():
             
             # List all extracted frame images
             frame_files = sorted(os.listdir(temp_dir))
+            total_frames = len(frame_files)
             
             # Initialize the OpenCV window
             cv2.namedWindow("Frame Viewer", cv2.WINDOW_NORMAL)
             
-            # Track the current frame index
-            current_frame = 0
-            
-            # Function to display the current frame with frame number overlay
+            # Function to display the current frame with frame number and total frames overlay
             def show_frame(frame_index):
                 if 0 <= frame_index < len(frame_files):
                     frame_path = os.path.join(temp_dir, frame_files[frame_index])
                     image = cv2.imread(frame_path)
 
-                    # Overlay the current frame number on the image
+                    # Overlay the current frame number and total frames on the image
                     font = cv2.FONT_HERSHEY_SIMPLEX
-                    text = f"Frame: {frame_index + 1}"
+                    text = f"Frame: {frame_index + 1}/{total_frames}"
                     color = (0, 255, 0)  # Green color
                     thickness = 2
                     position = (30, 30)  # Position to place the text
@@ -66,20 +64,31 @@ def main():
                     print("Invalid frame index.")
             
             # Show the first frame
+            current_frame = 0
             show_frame(current_frame)
             
+            # Create a trackbar (slider) to control the frame navigation
+            def on_trackbar(val):
+                nonlocal current_frame
+                current_frame = val
+                show_frame(current_frame)
+
+            cv2.createTrackbar("Frame", "Frame Viewer", 0, total_frames - 1, on_trackbar)
+            
             while True:
-                # Wait for user input to navigate frames
-                key = cv2.waitKeyEx(0)  # 0 means wait indefinitely for a key press
+                # Wait for user input
+                key = cv2.waitKeyEx(1)  # 1 means wait for 1 ms, allowing slider movement
                 
                 if key == ord('q'):  # Press 'q' to quit
                     break
                 elif key == 2424832:  # Left arrow key (OpenCV key code)
-                    current_frame = max(current_frame - 1, 0)
+                    current_frame = max(current_frame - 1, 0)  # Move 1 frame backward
                     show_frame(current_frame)
+                    cv2.setTrackbarPos("Frame", "Frame Viewer", current_frame)  # Update slider
                 elif key == 2555904:  # Right arrow key (OpenCV key code)
-                    current_frame = min(current_frame + 1, len(frame_files) - 1)
+                    current_frame = min(current_frame + 1, len(frame_files) - 1)  # Move 1 frame forward
                     show_frame(current_frame)
+                    cv2.setTrackbarPos("Frame", "Frame Viewer", current_frame)  # Update slider
             
             # Close the OpenCV window
             cv2.destroyAllWindows()
