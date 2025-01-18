@@ -2,17 +2,12 @@ import subprocess
 import argparse
 import os
 
-def main():
-    parser = argparse.ArgumentParser(description="Extract a frame from a video at a specific timestamp using FFmpeg.")
-    parser.add_argument("video_path", help="Path to the input video file.")
-    parser.add_argument("timestamp", help="Timestamp to extract the frame (format: HH:MM:SS.mmm).")
-    
-    args = parser.parse_args()
+def grabber(video_path, timestamp):
 
     # Generate unique output image path based on timestamp
-    output_image_path = generate_unique_image_path(args.video_path, args.timestamp)
+    output_image_path = generate_unique_image_path(video_path, timestamp)
     
-    extract_frame(args.video_path, args.timestamp, output_image_path)
+    extract_frame(video_path, timestamp, output_image_path)
 
 
 def extract_frame(video_path, timestamp, output_image_path):

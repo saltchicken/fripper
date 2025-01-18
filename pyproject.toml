@@ -10,8 +10,7 @@ dependencies = [
 ]
 
 [project.scripts]
-run_frames = "frame_splitter.__main__:main"
-grab_frame = "frame_grabber.__main__:main"
+frame_analysis = "frame_analysis.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

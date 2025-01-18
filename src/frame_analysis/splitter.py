@@ -4,20 +4,11 @@ import os
 import argparse
 import cv2
 
-def main():
-    # Set up the argument parser
-    parser = argparse.ArgumentParser(description="Extract frames from a video file.")
-    parser.add_argument("input_file", help="Path to the input video file")
-
-    # Parse the command-line arguments
-    args = parser.parse_args()
-
-    # Input video file from command-line argument
-    input_file = args.input_file
+def splitter(video_path):
 
     # Ensure the input file exists
-    if not os.path.exists(input_file):
-        print(f"Error: The file '{input_file}' does not exist.")
+    if not os.path.exists(video_path):
+        print(f"Error: The file '{video_path}' does not exist.")
         exit(1)
 
     # Create a temporary directory to store the frames
@@ -28,7 +19,7 @@ def main():
         # FFmpeg command to extract frames 4 times per second
         command = [
             "ffmpeg",
-            "-i", input_file,    # Input video
+            "-i", video_path,    # Input video
             "-vf", "fps=4",      # Extract 4 frames per second
             output_pattern       # Output frames to temporary directory
         ]
