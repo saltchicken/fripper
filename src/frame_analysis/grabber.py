@@ -52,7 +52,8 @@ def generate_unique_image_path(video_path, timestamp):
     timestamp_str = timestamp.replace(":", "-").replace(".", "-")
     
     # Create a unique output path
-    output_dir = os.path.dirname(video_path)  # Save in the same directory as the video
+    # output_dir = os.path.dirname(video_path)  # Save in the same directory as the video
+    output_dir = os.getcwd()
     output_image_path = os.path.join(output_dir, f"{video_filename}_{timestamp_str}.jpg")
     
     return output_image_path
