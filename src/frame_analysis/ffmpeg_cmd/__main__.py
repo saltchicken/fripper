@@ -20,7 +20,7 @@ def is_path_valid(video_path):
         raise FileNotFoundError(f"Error: The file '{video_path}' does not exist")
 
 
-def rip_frames(video_path, output_directory, output_pattern, fps=4, nvidia=False):
+def rip_frames(video_path, output_directory, output_pattern, fps=4, start=None, nvidia=False):
     """
     Extracts frames from a video file using FFmpeg and saves them to the specified
     output directory a specified frame rate.
@@ -76,6 +76,11 @@ def rip_frames(video_path, output_directory, output_pattern, fps=4, nvidia=False
             f"fps={fps}",  # Extract 4 frames per second
             output_pattern,  # Output frames to temporary directory
         ]
+
+    if start:
+        command = command[:1] + ["-ss", start, "-t", "2"] + command[1:]
+
+    print(command)
 
     try:
         # Run the FFmpeg command to extract frames

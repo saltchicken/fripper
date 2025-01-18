@@ -1,13 +1,14 @@
 import tempfile
 import os
 import cv2
+import subprocess
 from .ffmpeg_cmd import rip_frames
-from .utils import seconds_to_hms
+from .utils import seconds_to_hms, subtract_seconds
 
 
-def splitter(video_path, fps=4, nvidia=False):
+def splitter(video_path, fps=4, start=None, nvidia=False):
     with tempfile.TemporaryDirectory() as temp_dir:
-        rip_frames(video_path, temp_dir, "frame_%04d.jpg", fps=4)
+        rip_frames(video_path, temp_dir, "frame_%04d.jpg", fps=fps, start=start)
 
         # List all extracted frame images
         frame_files = sorted(os.listdir(temp_dir))
@@ -66,6 +67,10 @@ def splitter(video_path, fps=4, nvidia=False):
             elif key == ord(' '):
                 timestamp = seconds_to_hms(current_frame / 4)
                 print(f"Current frame timestamp (FFmpeg format): {timestamp}")
+
+                #TODO: Hacky solution
+                shifted_timestamp = subtract_seconds(timestamp, 1)
+                subprocess.Popen(['frame_analysis', 'split', video_path, "--fps", "60", "--start", shifted_timestamp])
 
         # Close the OpenCV window
         cv2.destroyAllWindows()
