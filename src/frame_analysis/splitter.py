@@ -6,8 +6,6 @@ import cv2
 
 
 def splitter(video_path, fps=4, nvidia=False):
-    print("hello")
-
     # Ensure the input file exists
     if not os.path.exists(video_path):
         print(f"Error: The file '{video_path}' does not exist.")
