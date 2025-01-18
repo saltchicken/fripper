@@ -5,7 +5,8 @@ import sys
 import cv2
 
 
-def splitter(video_path, nvidia=False):
+def splitter(video_path, fps=4, nvidia=False):
+    print("hello")
 
     # Ensure the input file exists
     if not os.path.exists(video_path):
@@ -24,14 +25,14 @@ def splitter(video_path, nvidia=False):
                 "ffmpeg",
                 "-hwaccel", "cuda",
                 "-i", video_path,    # Input video
-                "-vf", "fps=4",      # Extract 4 frames per second
+                "-vf", f"fps={fps}",      # Extract 4 frames per second
                 output_pattern       # Output frames to temporary directory
             ]
         else:
             command = [
                 "ffmpeg",
                 "-i", video_path,    # Input video
-                "-vf", "fps=4",      # Extract 4 frames per second
+                "-vf", f"fps={fps}",      # Extract 4 frames per second
                 output_pattern       # Output frames to temporary directory
             ]
 
