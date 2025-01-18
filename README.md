@@ -4,6 +4,8 @@ Analyze frames of video files and simplifies collecting input for advanced analy
 
 ## Installation
 
+ffmpeg needs to be available via commandline
+
 pip install git+https://github.com/saltchicken/frame_analysis
 
 ## Usage
