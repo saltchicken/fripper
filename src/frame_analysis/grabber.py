@@ -4,6 +4,8 @@ import os
 
 def grabber(video_path, timestamp):
 
+    # TODO: Add validation for video_path and timestamp
+
     # Generate unique output image path based on timestamp
     output_image_path = generate_unique_image_path(video_path, timestamp)
     
