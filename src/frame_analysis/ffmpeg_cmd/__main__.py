@@ -85,3 +85,32 @@ def rip_frames(video_path, output_directory, output_pattern, fps=4, nvidia=False
     except subprocess.CalledProcessError as e:
         print(f"FFmpeg subprocess failure: {e}")
         raise subprocess.CalledProcessError
+
+def grab_frame(video_path, timestamp, output_directory=None):
+    # TODO: Validate timestamp
+    video_filename = os.path.splitext(os.path.basename(video_path))[0]
+    timestamp_str = timestamp.replace(":", "-").replace(".", "-")
+
+    if output_directory:
+        is_path_valid(output_directory)
+        output_image_path = os.path.join(output_directory, f"{video_filename}_{timestamp_str}.jpg")
+    else:
+        output_image_path = os.path.join(os.getcwd(), f"{video_filename}_{timestamp_str}.jpg")
+
+    command = [
+            "ffmpeg",
+            "-ss", timestamp,  # Seek to the specific timestamp
+            "-i", video_path,  # Input video
+            "-frames:v", "1",  # Extract only one frame
+            "-q:v", "2",       # Set quality (lower value = higher quality)
+            output_image_path, # Output image path
+            "-y"               # Overwrite output file if it exists
+        ]
+    try:
+        subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(f"Frame extracted and saved to {output_image_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred: {e.stderr.decode()}")
+
+
+

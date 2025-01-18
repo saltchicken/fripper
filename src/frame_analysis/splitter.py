@@ -1,9 +1,8 @@
-import subprocess
 import tempfile
 import os
-import sys
 import cv2
 from .ffmpeg_cmd import rip_frames
+from .utils import seconds_to_hms
 
 
 def splitter(video_path, fps=4, nvidia=False):
@@ -17,13 +16,6 @@ def splitter(video_path, fps=4, nvidia=False):
         # Initialize the OpenCV window
         cv2.namedWindow("Frame Viewer", cv2.WINDOW_NORMAL)
 
-        # Function to convert seconds to HH:MM:SS format
-        def seconds_to_hms(seconds):
-            hours = seconds // 3600
-            minutes = (seconds % 3600) // 60
-            secs = seconds % 60
-            # Include milliseconds
-            return f"{int(hours):02}:{int(minutes):02}:{secs:06.3f}"
 
         # Function to display the current frame with frame number and total frames overlay
         def show_frame(frame_index):
