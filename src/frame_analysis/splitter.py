@@ -2,8 +2,8 @@ import tempfile
 import os
 import cv2
 import subprocess
-from .ffmpeg_cmd import rip_frames
-from .utils import seconds_to_hms, subtract_seconds
+from .ffmpeg_cmd import rip_frames, grab_frame
+from .utils import seconds_to_hms, subtract_seconds, add_timestamps
 
 
 def splitter(video_path, fps=4, start=None, nvidia=False):
@@ -64,8 +64,13 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
                                     len(frame_files) - 1)
                 show_frame(current_frame)
                 cv2.setTrackbarPos("Frame", "Frame Viewer", current_frame)
+            elif key == ord('s'):
+                timestamp = seconds_to_hms(current_frame / int(fps)) 
+                if start:
+                    timestamp = add_timestamps(timestamp, start)
+                grab_frame(video_path, timestamp)
             elif key == ord(' '):
-                timestamp = seconds_to_hms(current_frame / 4)
+                timestamp = seconds_to_hms(current_frame / int(fps))
                 print(f"Current frame timestamp (FFmpeg format): {timestamp}")
 
                 #TODO: Hacky solution

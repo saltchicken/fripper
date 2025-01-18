@@ -28,3 +28,22 @@ def subtract_seconds(timestamp: str, seconds_to_subtract: int) -> str:
     if new_timestamp.startswith("-"):
         new_timestamp = "00:00:00.000"
     return new_timestamp
+
+def add_timestamps(timestamp1: str, timestamp2: str) -> str:
+    # Convert both timestamps to timedelta objects
+    time_obj1 = timedelta(hours=int(timestamp1[:2]), minutes=int(timestamp1[3:5]), seconds=int(timestamp1[6:8]), milliseconds=int(timestamp1[9:12]))
+    time_obj2 = timedelta(hours=int(timestamp2[:2]), minutes=int(timestamp2[3:5]), seconds=int(timestamp2[6:8]), milliseconds=int(timestamp2[9:12]))
+
+    # Add the two timedelta objects
+    total_time = time_obj1 + time_obj2
+
+    # Convert the total timedelta back to HH:MM:SS.mmm format
+    total_seconds = int(total_time.total_seconds())
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    milliseconds = total_time.microseconds // 1000
+
+    # Format the new timestamp as HH:MM:SS.mmm
+    new_timestamp = f"{hours:02}:{minutes:02}:{seconds:02}.{milliseconds:03}"
+    return new_timestamp
