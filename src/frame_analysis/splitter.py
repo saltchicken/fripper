@@ -4,7 +4,7 @@ import os
 import argparse
 import cv2
 
-def splitter(video_path):
+def splitter(video_path, nvidia=False):
 
     # Ensure the input file exists
     if not os.path.exists(video_path):
@@ -17,12 +17,21 @@ def splitter(video_path):
         output_pattern = os.path.join(temp_dir, "frame_%04d.jpg")
         
         # FFmpeg command to extract frames 4 times per second
-        command = [
-            "ffmpeg",
-            "-i", video_path,    # Input video
-            "-vf", "fps=4",      # Extract 4 frames per second
-            output_pattern       # Output frames to temporary directory
-        ]
+        if nvidia:
+            command = [
+                "ffmpeg",
+                "-i", video_path,    # Input video
+                "-c:v", "h264_nvenc",
+                "-vf", "fps=4",      # Extract 4 frames per second
+                output_pattern       # Output frames to temporary directory
+            ]
+       else:
+            command = [
+                "ffmpeg",
+                "-i", video_path,    # Input video
+                "-vf", "fps=4",      # Extract 4 frames per second
+                output_pattern       # Output frames to temporary directory
+            ]
         
         try:
             # Run the FFmpeg command to extract frames

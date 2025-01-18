@@ -2,17 +2,17 @@ import subprocess
 import argparse
 import os
 
-def grabber(video_path, timestamp):
+def grabber(video_path, timestamp, nvidia=False):
 
     # TODO: Add validation for video_path and timestamp
 
     # Generate unique output image path based on timestamp
     output_image_path = generate_unique_image_path(video_path, timestamp)
     
-    extract_frame(video_path, timestamp, output_image_path)
+    extract_frame(video_path, timestamp, output_image_path, nvidia)
 
 
-def extract_frame(video_path, timestamp, output_image_path):
+def extract_frame(video_path, timestamp, output_image_path, nvidia=False):
     """
     Extracts a frame from a video at a specific timestamp.
 
@@ -20,15 +20,29 @@ def extract_frame(video_path, timestamp, output_image_path):
     :param timestamp: The timestamp to extract the frame (format: HH:MM:SS.mmm).
     :param output_image_path: Path to save the extracted frame (e.g., frame.jpg).
     """
-    command = [
-        "ffmpeg",
-        "-ss", timestamp,  # Seek to the specific timestamp
-        "-i", video_path,  # Input video
-        "-frames:v", "1",  # Extract only one frame
-        "-q:v", "2",       # Set quality (lower value = higher quality)
-        output_image_path, # Output image path
-        "-y"               # Overwrite output file if it exists
-    ]
+
+    if nvidia:
+        command = [
+            "ffmpeg",
+            "-ss", timestamp,  # Seek to the specific timestamp
+            "-i", video_path,  # Input video
+            "-c:v", "h264_nvenc",
+            "-frames:v", "1",  # Extract only one frame
+            "-q:v", "2",       # Set quality (lower value = higher quality)
+            output_image_path, # Output image path
+            "-y"               # Overwrite output file if it exists
+        ]
+    else:
+        command = [
+            "ffmpeg",
+            "-ss", timestamp,  # Seek to the specific timestamp
+            "-i", video_path,  # Input video
+            "-frames:v", "1",  # Extract only one frame
+            "-q:v", "2",       # Set quality (lower value = higher quality)
+            output_image_path, # Output image path
+            "-y"               # Overwrite output file if it exists
+        ]
+
     
     try:
         subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
