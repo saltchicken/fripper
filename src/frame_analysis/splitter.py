@@ -1,7 +1,7 @@
 import subprocess
 import tempfile
 import os
-import argparse
+import sys
 import cv2
 
 
@@ -10,7 +10,7 @@ def splitter(video_path, nvidia=False):
     # Ensure the input file exists
     if not os.path.exists(video_path):
         print(f"Error: The file '{video_path}' does not exist.")
-        exit(1)
+        sys.exit(1)
 
     # Create a temporary directory to store the frames
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -75,11 +75,9 @@ def splitter(video_path, nvidia=False):
                 else:
                     print("Invalid frame index.")
 
-            # Show the first frame
             current_frame = 0
             show_frame(current_frame)
 
-            # Create a trackbar (slider) to control the frame navigation
             def on_trackbar(val):
                 nonlocal current_frame
                 current_frame = val
@@ -89,37 +87,26 @@ def splitter(video_path, nvidia=False):
                                total_frames - 1, on_trackbar)
 
             while True:
-                # Wait for user input
-                # 1 means wait for 1 ms, allowing slider movement
                 key = cv2.waitKeyEx(1)
 
-                if key == ord('q'):  # Press 'q' to quit
+                if key == ord('q'):
                     break
-                elif key == 2424832:  # Left arrow key (OpenCV key code)
-                    # Move 1 frame backward
+                if key == 2424832:
                     current_frame = max(current_frame - 1, 0)
                     show_frame(current_frame)
                     cv2.setTrackbarPos("Frame", "Frame Viewer",
                                        current_frame)  # Update slider
-                elif key == 2555904:  # Right arrow key (OpenCV key code)
-                    # Move 1 frame forward
+                elif key == 2555904:
                     current_frame = min(current_frame + 1,
                                         len(frame_files) - 1)
                     show_frame(current_frame)
-                    cv2.setTrackbarPos("Frame", "Frame Viewer",
-                                       current_frame)  # Update slider
-                elif key == ord(' '):  # Spacebar to print the current frame's timestamp
-                    # Divide by 4 since there are 4 frames per second
+                    cv2.setTrackbarPos("Frame", "Frame Viewer", current_frame)
+                elif key == ord(' '):
                     timestamp = seconds_to_hms(current_frame / 4)
-                    print(
-                        f"Current frame timestamp (FFmpeg format): {timestamp}")
+                    print(f"Current frame timestamp (FFmpeg format): {timestamp}")
 
             # Close the OpenCV window
             cv2.destroyAllWindows()
 
         except subprocess.CalledProcessError as e:
             print(f"An error occurred: {e}")
-
-
-if __name__ == "__main__":
-    main()
