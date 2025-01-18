@@ -1,12 +1,11 @@
-import subprocess
 import os
-import sys
+import subprocess
 
 
 def is_path_valid(video_path):
     """
     Checks if the specified video file path exists. If the file does not exist,
-    an error message is printed and the program exits with a status code of 1.
+    a FileNotFoundError is raised.
 
     Args:
         video_path (str): The path to the video file to check for existence.
@@ -14,32 +13,68 @@ def is_path_valid(video_path):
     Returns:
         None
 
-    Exits:
-        The program exits with status code 1 if the video file does not exist.
+    Raises:
+            FileNotFoundError: If the video file does not exist.
     """
     if not os.path.exists(video_path):
-        print(f"Error: The file '{video_path}' does not exist.")
-        sys.exit(1)
+        raise FileNotFoundError(f"Error: The file '{video_path}' does not exist")
 
 
 def rip_frames(video_path, output_directory, output_pattern, fps=4, nvidia=False):
+    """
+    Extracts frames from a video file using FFmpeg and saves them to the specified
+    output directory a specified frame rate.
+
+    Optionally, NVIDIA CUDA hardware acceleration can be used for faster frame extraction.
+
+    Args:
+        video_path (str): The path to the input video file to extract frames from.
+        output_directory (str): The directory where the extracted frames will be saved.
+        output_pattern (str): The filename pattern for the output frames
+                            (e.g., 'frame_%04d.jpg' for sequentially numbered frames).
+        fps (int, optional): The frame rate (frames per second) at which to extract frames.
+                             Defaults to 4.
+        nvidia (bool, optional): Whether to use NVIDIA CUDA hardware acceleration for
+                            processing. Defaults to False.
+
+    Returns:
+        None
+
+    Raises:
+        FileNotFoundError: If the input video file does not exist (checked via `is_path_valid`).
+        subprocess.CalledProcessError: If FFmpeg encounters an error during execution.
+        Exception: For any other unexpected errors.
+
+    Example:
+        >>> rip_frames("video.mp4", "output_frames", "frame_%04d.jpg", fps=5)
+        Frames extracted to: output_frames
+
+    Notes:
+        - Ensure FFmpeg is installed and accessible from the system's PATH.
+    """
+
     is_path_valid(video_path)
     output_pattern = os.path.join(output_directory, output_pattern)
 
     if nvidia:
         command = [
             "ffmpeg",
-            "-hwaccel", "cuda",
-            "-i", video_path,    # Input video
-            "-vf", f"fps={fps}",      # Extract 4 frames per second
-            output_pattern       # Output frames to temporary directory
+            "-hwaccel",
+            "cuda",
+            "-i",
+            video_path,  # Input video
+            "-vf",
+            f"fps={fps}",  # Extract 4 frames per second
+            output_pattern,  # Output frames to temporary directory
         ]
     else:
         command = [
             "ffmpeg",
-            "-i", video_path,    # Input video
-            "-vf", f"fps={fps}",      # Extract 4 frames per second
-            output_pattern       # Output frames to temporary directory
+            "-i",
+            video_path,  # Input video
+            "-vf",
+            f"fps={fps}",  # Extract 4 frames per second
+            output_pattern,  # Output frames to temporary directory
         ]
 
     try:
@@ -48,4 +83,5 @@ def rip_frames(video_path, output_directory, output_pattern, fps=4, nvidia=False
         print(f"Frames extracted to: {output_directory}")
 
     except subprocess.CalledProcessError as e:
-        print(f"An error occurred: {e}")
+        print(f"FFmpeg subprocess failure: {e}")
+        raise subprocess.CalledProcessError
