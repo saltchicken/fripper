@@ -23,7 +23,7 @@ def splitter(video_path, nvidia=False):
             command = [
                 "ffmpeg",
                 "-i", video_path,    # Input video
-                "-c:v", "h264_nvenc",
+                "-hwaccel", "cuda",
                 "-vf", "fps=4",      # Extract 4 frames per second
                 output_pattern       # Output frames to temporary directory
             ]
