@@ -86,31 +86,56 @@ def rip_frames(video_path, output_directory, output_pattern, fps=4, nvidia=False
         print(f"FFmpeg subprocess failure: {e}")
         raise subprocess.CalledProcessError
 
+
 def grab_frame(video_path, timestamp, output_directory=None):
+    """
+    Extracts a single frame from a video at a specified timestamp and saves it as a JPEG image.
+
+    Args:
+        video_path (str): The path to the video file from which to extract the frame.
+        timestamp (str): The timestamp at which to grab the frame, in the format 'HH:MM:SS' or
+                         'HH:MM:SS.MS'.
+        output_directory (str, optional): The directory to save the extracted frame image. If
+                        not provided, the image is saved in the current working directory.
+
+    Raises:
+        subprocess.CalledProcessError: If an error occurs during the frame extraction process
+                        using FFmpeg.
+
+    Returns:
+        None
+    """
     # TODO: Validate timestamp
     video_filename = os.path.splitext(os.path.basename(video_path))[0]
     timestamp_str = timestamp.replace(":", "-").replace(".", "-")
 
     if output_directory:
         is_path_valid(output_directory)
-        output_image_path = os.path.join(output_directory, f"{video_filename}_{timestamp_str}.jpg")
+        output_image_path = os.path.join(
+            output_directory, f"{video_filename}_{timestamp_str}.jpg"
+        )
     else:
-        output_image_path = os.path.join(os.getcwd(), f"{video_filename}_{timestamp_str}.jpg")
+        output_image_path = os.path.join(
+            os.getcwd(), f"{video_filename}_{timestamp_str}.jpg"
+        )
 
     command = [
-            "ffmpeg",
-            "-ss", timestamp,  # Seek to the specific timestamp
-            "-i", video_path,  # Input video
-            "-frames:v", "1",  # Extract only one frame
-            "-q:v", "2",       # Set quality (lower value = higher quality)
-            output_image_path, # Output image path
-            "-y"               # Overwrite output file if it exists
-        ]
+        "ffmpeg",
+        "-ss",
+        timestamp,  # Seek to the specific timestamp
+        "-i",
+        video_path,  # Input video
+        "-frames:v",
+        "1",  # Extract only one frame
+        "-q:v",
+        "2",  # Set quality (lower value = higher quality)
+        output_image_path,  # Output image path
+        "-y",  # Overwrite output file if it exists
+    ]
     try:
-        subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(
+            command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
         print(f"Frame extracted and saved to {output_image_path}")
     except subprocess.CalledProcessError as e:
         print(f"Error occurred: {e.stderr.decode()}")
-
-
-
