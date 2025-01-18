@@ -1,15 +1,18 @@
 import subprocess
 import argparse
+import os
 
 def main():
     parser = argparse.ArgumentParser(description="Extract a frame from a video at a specific timestamp using FFmpeg.")
     parser.add_argument("video_path", help="Path to the input video file.")
     parser.add_argument("timestamp", help="Timestamp to extract the frame (format: HH:MM:SS.mmm).")
-    parser.add_argument("output_image_path", help="Path to save the extracted frame (e.g., frame.jpg).")
     
     args = parser.parse_args()
+
+    # Generate unique output image path based on timestamp
+    output_image_path = generate_unique_image_path(args.video_path, args.timestamp)
     
-    extract_frame(args.video_path, args.timestamp, args.output_image_path)
+    extract_frame(args.video_path, args.timestamp, output_image_path)
 
 
 def extract_frame(video_path, timestamp, output_image_path):
@@ -35,6 +38,28 @@ def extract_frame(video_path, timestamp, output_image_path):
         print(f"Frame extracted and saved to {output_image_path}")
     except subprocess.CalledProcessError as e:
         print(f"Error occurred: {e.stderr.decode()}")
+
+
+def generate_unique_image_path(video_path, timestamp):
+    """
+    Generate a unique image path based on the video filename and timestamp.
+
+    :param video_path: Path to the input video file.
+    :param timestamp: The timestamp to extract the frame (format: HH:MM:SS.mmm).
+    :return: A unique file path for the output image.
+    """
+    # Extract the base video filename without extension
+    video_filename = os.path.splitext(os.path.basename(video_path))[0]
+    
+    # Format the timestamp to a filename-friendly format (replace colons and periods with underscores)
+    timestamp_str = timestamp.replace(":", "-").replace(".", "-")
+    
+    # Create a unique output path
+    output_dir = os.path.dirname(video_path)  # Save in the same directory as the video
+    output_image_path = os.path.join(output_dir, f"{video_filename}_{timestamp_str}.jpg")
+    
+    return output_image_path
+
 
 if __name__ == "__main__":
     main()
