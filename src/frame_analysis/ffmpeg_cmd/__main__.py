@@ -108,7 +108,7 @@ def grab_frame(video_path, timestamp, output_directory=None):
                         using FFmpeg.
 
     Returns:
-        None
+        video_filename (str): The path the frame was saved to.
     """
     # TODO: Validate timestamp
     video_filename = os.path.splitext(os.path.basename(video_path))[0]
@@ -144,3 +144,5 @@ def grab_frame(video_path, timestamp, output_directory=None):
         print(f"Frame extracted and saved to {output_image_path}")
     except subprocess.CalledProcessError as e:
         print(f"Error occurred: {e.stderr.decode()}")
+
+    return output_image_path

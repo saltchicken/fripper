@@ -1,6 +1,7 @@
 import argparse
 import sys
 from .splitter import splitter
+from .preview import preview_frame
 from .ffmpeg_cmd import grab_frame
 
 def main():
@@ -20,6 +21,10 @@ def main():
     grab_parser.add_argument("timestamp", help="Timestamp to extract the frame (format: HH:MM:SS.mmm).")
     grab_parser.add_argument("--output-path", default=None, help="Output path of extracted frame")
 
+    preview_parser = subparsers.add_parser("preview", help="Preview a single frame of a video")
+    preview_parser.add_argument("video_path", help="Path to the video")
+    preview_parser.add_argument("timestamp", default="00:00:00.000", help="Timestamp to extract the frame (format: HH:MM:SS.mmm).")
+
     args = parser.parse_args()
 
 
@@ -29,6 +34,8 @@ def main():
         splitter(args.video_path, fps=args.fps, start=args.start, nvidia=args.nvidia)
     elif args.command == "grab":
         grab_frame(args.video_path, args.timestamp, args.output_path)
+    elif args.command == "preview":
+        preview_frame(args.video_path, args.timestamp)
     else:
         print("Invalid command")
         sys.exit(1)
