@@ -2,7 +2,7 @@ import argparse
 import sys
 from .splitter import splitter
 from .preview import preview_frame, preview_thumbnails
-from .ffmpeg_cmd import grab_frame
+from .ffmpeg_cmd import grab_frame, grab_thumbnails
 
 def main():
     parser = argparse.ArgumentParser(description="Frame analysis tool")
@@ -18,12 +18,13 @@ def main():
     # Subcommand for grabbing frames
     grab_parser = subparsers.add_parser("grab", help="Grab a single frame from a video")
     grab_parser.add_argument("video_path", help="Path to the video")
-    grab_parser.add_argument("timestamp", help="Timestamp to extract the frame (format: HH:MM:SS.mmm).")
+    grab_parser.add_argument("--timestamp", default="00:00:00.000", help="Timestamp to extract the frame (format: HH:MM:SS.mmm).")
     grab_parser.add_argument("--output-path", default=None, help="Output path of extracted frame")
+    grab_parser.add_argument("--thumbnails", action="store_true", help="Grab thumbnails")
 
     preview_parser = subparsers.add_parser("preview", help="Preview a single frame of a video")
     preview_parser.add_argument("video_path", help="Path to the video")
-    preview_parser.add_argument("timestamp", default="00:00:00.000", help="Timestamp to extract the frame (format: HH:MM:SS.mmm).")
+    preview_parser.add_argument("--timestamp", default="00:00:00.000", help="Timestamp to extract the frame (format: HH:MM:SS.mmm).")
     preview_parser.add_argument("--thumbnails", action="store_true", help="Display thumbnails")
 
     args = parser.parse_args()
@@ -34,7 +35,10 @@ def main():
             print("Using NVIDIA acceleration")
         splitter(args.video_path, fps=args.fps, start=args.start, nvidia=args.nvidia)
     elif args.command == "grab":
-        grab_frame(args.video_path, args.timestamp, args.output_path)
+        if args.thumbnails:
+            grab_thumbnails(args.video_path)
+        else:
+            grab_frame(args.video_path, args.timestamp, args.output_path)
     elif args.command == "preview":
         if args.thumbnails:
             preview_thumbnails(args.video_path)
