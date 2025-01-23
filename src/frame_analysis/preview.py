@@ -36,11 +36,9 @@ def preview_thumbnails(video_path):
         height = height // 2
         resized_images = [cv2.resize(image, (width, height)) for image in images]
 
-# Stitch images horizontally for each row (2 images in each row)
-        top_row = cv2.hconcat(resized_images[:2])  # First two images horizontally
-        bottom_row = cv2.hconcat(resized_images[2:])  # Last two images horizontally
+        top_row = cv2.hconcat(resized_images[:2])
+        bottom_row = cv2.hconcat(resized_images[2:])
 
-# Stitch the top and bottom rows vertically
         stitched_image = cv2.vconcat([top_row, bottom_row])
         cv2.imshow('Stitched Image', stitched_image)
         cv2.waitKey(0)
