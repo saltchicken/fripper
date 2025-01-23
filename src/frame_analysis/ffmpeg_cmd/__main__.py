@@ -79,6 +79,7 @@ def rip_frames(video_path, output_directory, output_pattern, fps=4, start=None, 
             output_pattern,  # Output frames to temporary directory
         ]
 
+    # TODO: Hack - This hardcodes a 2 second duration when start is specified. This needs to be specified via a parameter for more flexibility.
     if start:
         command = command[:1] + ["-ss", start, "-t", "2"] + command[1:]
 
