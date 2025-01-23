@@ -1,6 +1,8 @@
 import os
 import subprocess
 
+from .utils import calculate_inner_thumbnail_positions, seconds_to_hms
+
 
 def is_path_valid(video_path):
     """
@@ -170,6 +172,17 @@ def get_length_of_video(video_path):
 
     # print(result.stdout.decode())
     return float(result.stdout.decode())
+
+def grab_thumbnails(video_path, output_directory=None):
+    video_length = get_length_of_video(video_path)
+    positions = calculate_inner_thumbnail_positions(video_length, 4)
+    image_paths = []
+    for position in positions:
+        image_paths.append(grab_frame(video_path, seconds_to_hms(position), output_directory))
+    return image_paths
+
+
+
 
 
 

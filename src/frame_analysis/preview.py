@@ -1,8 +1,7 @@
 import tempfile
 import os
 import cv2
-from .ffmpeg_cmd import grab_frame, get_length_of_video
-from .utils import seconds_to_hms, calculate_inner_thumbnail_positions
+from .ffmpeg_cmd import grab_frame, grab_thumbnails, seconds_to_hms, calculate_inner_thumbnail_positions
 
 
 def preview_frame(video_path, start=None):
@@ -24,12 +23,7 @@ def preview_frame(video_path, start=None):
 
 def preview_thumbnails(video_path):
     with tempfile.TemporaryDirectory() as temp_dir:
-        video_length = get_length_of_video(video_path)
-        print(video_length)
-        positions = calculate_inner_thumbnail_positions(video_length, 4)
-        image_paths = []
-        for position in positions:
-            image_paths.append(grab_frame(video_path, seconds_to_hms(position), temp_dir))
+        image_paths = grab_thumbnails(video_path, temp_dir)
         images = [cv2.imread(path) for path in image_paths]
         width, height = images[0].shape[1], images[0].shape[0]
         width = width // 2

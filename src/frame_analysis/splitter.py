@@ -2,8 +2,7 @@ import tempfile
 import os
 import cv2
 import subprocess
-from .ffmpeg_cmd import rip_frames, grab_frame
-from .utils import seconds_to_hms, subtract_seconds, add_timestamps
+from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps
 
 
 def splitter(video_path, fps=4, start=None, nvidia=False):
