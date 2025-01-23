@@ -146,3 +146,30 @@ def grab_frame(video_path, timestamp, output_directory=None):
         print(f"Error occurred: {e.stderr.decode()}")
 
     return output_image_path
+
+def get_length_of_video(video_path):
+    command = [
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-show_entries",
+        "format=duration",
+        "-of",
+        "csv=p=0",
+        video_path
+    ]
+
+    try:
+        result = subprocess.run(
+        command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred: {e.stderr.decode()}")
+
+    # print(result.stdout.decode())
+    return float(result.stdout.decode())
+
+
+

@@ -7,6 +7,14 @@ def seconds_to_hms(seconds):
     # Include milliseconds
     return f"{int(hours):02}:{int(minutes):02}:{secs:06.3f}"
 
+def calculate_inner_thumbnail_positions(duration, num_positions):
+    dutation = round(duration)
+    positions = []
+    for i in range(num_positions + 1):
+        position = (i * duration) / (num_positions + 1)
+        positions.append(round(position))
+    return positions[1:]
+
 def subtract_seconds(timestamp: str, seconds_to_subtract: int) -> str:
     # Convert the timestamp to timedelta
     time_obj = timedelta(hours=int(timestamp[:2]), minutes=int(timestamp[3:5]), seconds=int(timestamp[6:8]), milliseconds=int(timestamp[9:12]))
