@@ -1,6 +1,6 @@
-# Frame Analysis
+# Fripper
 
-Analyze frames of video files and simplifies collecting input for advanced analysis.
+Analyze and rip frames of video files and simplifies collecting input for advanced analysis.
 
 ## Installation
 
