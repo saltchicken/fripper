@@ -11,7 +11,7 @@ pip install git+https://github.com/saltchicken/frame_analysis
 ## Usage
 
 ```bash
-frame_analysis split input.mp4
+fripper split input.mp4
 
-frame_analysis grab input.mp4 00:00:00:000
+fripper grab input.mp4 00:00:00:000
 ```
