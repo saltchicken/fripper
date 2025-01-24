@@ -3,14 +3,13 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "frame_analysis"
+name = "fripper"
 version = "0.1"
 dependencies = [
-  "opencv-python==4.11.0.86"
 ]
 
 [project.scripts]
-frame_analysis = "frame_analysis.__main__:main"
+fripper = "fripper.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
