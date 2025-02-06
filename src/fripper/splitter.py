@@ -2,8 +2,10 @@ import tempfile
 import os
 import cv2
 import subprocess
-from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps
+from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip
 
+start_timestamp = None
+end_timestamp = None
 
 def splitter(video_path, fps=4, start=None, nvidia=False):
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -68,6 +70,18 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
                 if start:
                     timestamp = add_timestamps(timestamp, start)
                 grab_frame(video_path, timestamp)
+            elif key == ord('['):
+                start_timestamp = seconds_to_hms(current_frame / int(fps)) 
+            elif key == ord(']'):
+                end_timestamp = seconds_to_hms(current_frame / int(fps))
+            elif key == ord('c'):
+                # TODO: Add check to see if end_timestamp is greater than start_timestamp
+                if start_timestamp and end_timestamp:
+                    result = get_clip(video_path, start_timestamp, end_timestamp)
+                    print(result)
+                else:
+                    print("Please select a starting and ending timestamp using the '[' and ']' keys.")
+
             elif key == ord(' '):
                 timestamp = seconds_to_hms(current_frame / int(fps))
                 print(f"Current frame timestamp (FFmpeg format): {timestamp}")

@@ -182,6 +182,45 @@ def grab_thumbnails(video_path, output_directory=None):
         image_paths.append(grab_frame(video_path, seconds_to_hms(position), output_directory))
     return image_paths
 
+def get_clip(video_path, start_timestamp, end_timestamp, output_directory=None):
+    # TODO: Validate timestamp
+    video_filename = os.path.splitext(os.path.basename(video_path))[0]
+    video_extension = os.path.splitext(os.path.basename(video_path))[1]
+    timestamp_str = start_timestamp.replace(":", "-").replace(".", "-")
+
+    if output_directory:
+        is_path_valid(output_directory)
+        output_video_path = os.path.join(
+            output_directory, f"{video_filename}_{timestamp_str}.{video_extension}"
+        )
+    else:
+        output_video_path = os.path.join(
+            os.getcwd(), f"{video_filename}_{timestamp_str}.{video_extension}"
+        )
+    print(output_directory)
+    print(video_path)
+    command = [
+        "ffmpeg",
+        "-ss",
+        start_timestamp,
+        "-to",
+        end_timestamp,
+        "-i",
+        video_path,
+        "-c",
+        "copy",
+        output_video_path,
+        "-y",
+    ]
+    try:
+        result = subprocess.run(
+            command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred: {e.stderr.decode()}")
+
+    return result.stdout.decode()
+
 
 
 
