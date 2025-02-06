@@ -191,11 +191,11 @@ def get_clip(video_path, start_timestamp, end_timestamp, output_directory=None):
     if output_directory:
         is_path_valid(output_directory)
         output_video_path = os.path.join(
-            output_directory, f"{video_filename}_{timestamp_str}.{video_extension}"
+            output_directory, f"{video_filename}_{timestamp_str}{video_extension}"
         )
     else:
         output_video_path = os.path.join(
-            os.getcwd(), f"{video_filename}_{timestamp_str}.{video_extension}"
+            os.getcwd(), f"{video_filename}_{timestamp_str}{video_extension}"
         )
     print(output_directory)
     print(video_path)
