@@ -2,7 +2,7 @@ import tempfile
 import os
 import cv2
 import subprocess
-from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip
+from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip, add_seconds
 
 start_timestamp = None
 end_timestamp = None
@@ -83,6 +83,17 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
                     print(result)
                 else:
                     print("Please select a starting and ending timestamp using the '[' and ']' keys.")
+            elif key == ord('o'):
+                print("Running overlap")
+                if start_timestamp:
+                    for i in range(20):
+                        print(start_timestamp)
+                        result = get_clip(video_path, start_timestamp, add_seconds(start_timestamp, 5))
+                        print(result)
+                        start_timestamp = add_seconds(start_timestamp, 4)
+
+
+
 
             elif key == ord(' '):
                 timestamp = seconds_to_hms(current_frame / int(fps))
