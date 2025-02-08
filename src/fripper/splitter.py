@@ -72,8 +72,10 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
                 grab_frame(video_path, timestamp)
             elif key == ord('['):
                 start_timestamp = seconds_to_hms(current_frame / int(fps)) 
+                print(f"Start time_stamp: {start_timestamp}")
             elif key == ord(']'):
                 end_timestamp = seconds_to_hms(current_frame / int(fps))
+                print(f"End time_stamp: {end_timestamp}")
             elif key == ord('c'):
                 # TODO: Add check to see if end_timestamp is greater than start_timestamp
                 if start_timestamp and end_timestamp:

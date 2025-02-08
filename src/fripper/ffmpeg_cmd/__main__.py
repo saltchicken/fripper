@@ -198,7 +198,7 @@ def get_clip(video_path, start_timestamp, end_timestamp, output_directory=None):
             os.getcwd(), f"{video_filename}_{timestamp_str}{video_extension}"
         )
     print(output_directory)
-    print(video_path)
+    print(output_video_path)
     command = [
         "ffmpeg",
         "-ss",
