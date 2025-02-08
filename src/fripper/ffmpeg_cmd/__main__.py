@@ -185,7 +185,7 @@ def grab_thumbnails(video_path, output_directory=None):
 def get_clip(video_path, start_timestamp, end_timestamp, output_directory=None):
     # TODO: Validate timestamp
     video_filename = os.path.splitext(os.path.basename(video_path))[0]
-    video_extension = os.path.splitext(os.path.basename(video_path))[1]
+    video_extension = os.path.splitext(os.path.basename(video_path))[1][1:]
     timestamp_str = start_timestamp.replace(":", "-").replace(".", "-")
 
     if output_directory:
