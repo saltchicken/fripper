@@ -95,7 +95,7 @@ def rip_frames(video_path, output_directory, output_pattern, fps=4, start=None, 
         raise subprocess.CalledProcessError
 
 
-def grab_frame(video_path, timestamp, output_directory=None):
+def grab_frame(video_path, timestamp, output_directory=None, crop=None):
     """
     Extracts a single frame from a video at a specified timestamp and saves it as a JPEG image.
 
@@ -140,6 +140,18 @@ def grab_frame(video_path, timestamp, output_directory=None):
         output_image_path,  # Output image path
         "-y",  # Overwrite output file if it exists
     ]
+    if crop:
+        width = crop[1][0] - crop[0][0]
+        height = crop[1][1] - crop[0][1]
+        x = crop[0][0]
+        y = crop[0][1]
+        print(f"{width=} : {height=} : {x=} : {y=}")
+        command.insert(len(command) - 2, "-vf")
+        command.insert(len(command) - 2, f"crop={width}:{height}:{x}:{y}")
+        print(f"{command=}")
+    else:
+        print(f"{command=}")
+
     try:
         subprocess.run(
             command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -182,7 +194,7 @@ def grab_thumbnails(video_path, output_directory=None):
         image_paths.append(grab_frame(video_path, seconds_to_hms(position), output_directory))
     return image_paths
 
-def get_clip(video_path, start_timestamp, end_timestamp, output_directory=None):
+def get_clip(video_path, start_timestamp, end_timestamp, output_directory=None, crop=None):
     # TODO: Validate timestamp
     video_filename = os.path.splitext(os.path.basename(video_path))[0]
     video_extension = os.path.splitext(os.path.basename(video_path))[1]
@@ -216,7 +228,20 @@ def get_clip(video_path, start_timestamp, end_timestamp, output_directory=None):
         output_video_path,
         "-y",
     ]
+
+    if crop:
+        width = crop[1][0] - crop[0][0]
+        height = crop[1][1] - crop[0][1]
+        x = crop[0][0]
+        y = crop[0][1]
+        print(f"{width=} : {height=} : {x=} : {y=}")
+        command.insert(len(command) - 2, "-vf")
+        command.insert(len(command) - 2, f"crop={width}:{height}:{x}:{y}")
+        print(f"{command=}")
+    else:
+        print(f"{command=}")
     print(command)
+
     try:
         result = subprocess.run(
             command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE

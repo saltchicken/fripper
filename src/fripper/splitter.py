@@ -101,7 +101,10 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
                 timestamp = seconds_to_hms(current_frame / int(fps)) 
                 if start:
                     timestamp = add_timestamps(timestamp, start)
-                grab_frame(video_path, timestamp)
+                if rect_start_point and rect_end_point:
+                    grab_frame(video_path, timestamp, crop=[rect_start_point, rect_end_point])
+                else:
+                    grab_frame(video_path, timestamp)
             elif key == ord('['):
                 start_timestamp = seconds_to_hms(current_frame / int(fps)) 
                 print(f"Start time_stamp: {start_timestamp}")
@@ -111,8 +114,12 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
             elif key == ord('c'):
                 # TODO: Add check to see if end_timestamp is greater than start_timestamp
                 if start_timestamp and end_timestamp:
-                    result = get_clip(video_path, start_timestamp, end_timestamp)
-                    print(result)
+                    if rect_start_point and rect_end_point:
+                        result = get_clip(video_path, start_timestamp, end_timestamp, crop=[rect_start_point, rect_end_point])
+                        print(result)
+                    else:
+                        result = get_clip(video_path, start_timestamp, end_timestamp)
+                        print(result)
                 else:
                     print("Please select a starting and ending timestamp using the '[' and ']' keys.")
             elif key == ord('o'):
