@@ -7,6 +7,9 @@ from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds
 
 start_timestamp = None
 end_timestamp = None
+rect_start_point = None
+rect_end_point = None
+drawing = False
 
 def splitter(video_path, fps=4, start=None, nvidia=False):
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -21,14 +24,38 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
         if platform.system() == "Linux":
             cv2.setWindowProperty("Frame Viewer", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
+        def mouse_callback(event, x, y, flags, param):
+            global rect_start_point, rect_end_point, drawing
+
+            if event == cv2.EVENT_LBUTTONDOWN:
+                # When the left mouse button is pressed, record the start point
+                rect_start_point = (x, y)
+                drawing = True
 
 
-        # Function to display the current frame with frame number and total frames overlay
+            elif event == cv2.EVENT_MOUSEMOVE:
+                # While the mouse is moving and drawing is in progress, update the end point
+                if drawing:
+                    rect_end_point = (x, y)
+                    show_frame(current_frame)
+
+            elif event == cv2.EVENT_LBUTTONUP:
+                # When the left mouse button is released, finalize the rectangle
+                rect_end_point = (x, y)
+                drawing = False
+                show_frame(current_frame)
+
+
         def show_frame(frame_index):
+            global rect_start_point, rect_end_point
+
             if 0 <= frame_index < len(frame_files):
-                frame_path = os.path.join(
-                    temp_dir, frame_files[frame_index])
+                frame_path = os.path.join(temp_dir, frame_files[frame_index])
                 image = cv2.imread(frame_path)
+
+                # Draw the rectangle if defined
+                if rect_start_point and rect_end_point:
+                    cv2.rectangle(image, rect_start_point, rect_end_point, (0, 255, 0), 2)
 
                 # Overlay the current frame number and total frames on the image
                 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -36,12 +63,13 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
                 color = (0, 255, 0)  # Green color
                 thickness = 2
                 position = (30, 30)  # Position to place the text
-                image = cv2.putText(
-                    image, text, position, font, 1, color, thickness, lineType=cv2.LINE_AA)
+                image = cv2.putText(image, text, position, font, 1, color, thickness, lineType=cv2.LINE_AA)
 
                 cv2.imshow("Frame Viewer", image)
             else:
-                print("Invalid frame index.")
+                print("invalid frame index.")
+
+        cv2.setMouseCallback("Frame Viewer", mouse_callback)
 
         current_frame = 0
         show_frame(current_frame)
