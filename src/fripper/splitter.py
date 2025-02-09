@@ -2,6 +2,7 @@ import tempfile
 import os
 import cv2
 import subprocess
+import platform
 from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip, add_seconds
 
 start_timestamp = None
@@ -17,7 +18,8 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
 
         # Initialize the OpenCV window
         cv2.namedWindow("Frame Viewer", cv2.WINDOW_NORMAL)
-        cv2.setWindowProperty('Frame Viewer', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        if platform.system() == "Linux":
+            cv2.setWindowProperty("Frame Viewer", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 
 
