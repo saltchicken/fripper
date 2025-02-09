@@ -17,6 +17,8 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
 
         # Initialize the OpenCV window
         cv2.namedWindow("Frame Viewer", cv2.WINDOW_NORMAL)
+        cv2.setWindowProperty('Frame Viewer', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
 
 
         # Function to display the current frame with frame number and total frames overlay
