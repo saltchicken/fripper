@@ -2,32 +2,10 @@ import tempfile
 import os
 import cv2
 import subprocess
-import platform
 from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip, add_seconds
 
-# Global variables
 start_timestamp = None
 end_timestamp = None
-
-rect_start = None
-rect_end = None
-cropping = False
-
-def mouse_callback(event, x, y, flags, param):
-    global rect_start, rect_end, cropping
-
-    if event == cv2.EVENT_LBUTTONDOWN:  # Left mouse button pressed
-        rect_start = (x, y)
-        rect_end = (x, y)
-        cropping = True
-
-    elif event == cv2.EVENT_MOUSEMOVE:  # Mouse movement
-        if cropping:
-            rect_end = (x, y)
-
-    elif event == cv2.EVENT_LBUTTONUP:  # Left mouse button released
-        rect_end = (x, y)
-        cropping = False
 
 def splitter(video_path, fps=4, start=None, nvidia=False):
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -39,22 +17,16 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
 
         # Initialize the OpenCV window
         cv2.namedWindow("Frame Viewer", cv2.WINDOW_NORMAL)
-        os_name = platform.system()
-        if os_name == 'Linux':
-            cv2.setWindowProperty('Frame Viewer', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        cv2.setMouseCallback("Frame Viewer", mouse_callback)
+        cv2.setWindowProperty('Frame Viewer', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
+
 
         # Function to display the current frame with frame number and total frames overlay
         def show_frame(frame_index):
             if 0 <= frame_index < len(frame_files):
-                frame_path = os.path.join(temp_dir, frame_files[frame_index])
+                frame_path = os.path.join(
+                    temp_dir, frame_files[frame_index])
                 image = cv2.imread(frame_path)
-
-                temp_image = image.copy()
-
-                # Draw the rectangle on the frame if defined
-                if rect_start and rect_end:
-                    cv2.rectangle(temp_image, rect_start, rect_end, (0, 255, 0), 2)
 
                 # Overlay the current frame number and total frames on the image
                 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -62,10 +34,10 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
                 color = (0, 255, 0)  # Green color
                 thickness = 2
                 position = (30, 30)  # Position to place the text
-                temp_image = cv2.putText(
-                    temp_image, text, position, font, 1, color, thickness, lineType=cv2.LINE_AA)
+                image = cv2.putText(
+                    image, text, position, font, 1, color, thickness, lineType=cv2.LINE_AA)
 
-                cv2.imshow("Frame Viewer", temp_image)
+                cv2.imshow("Frame Viewer", image)
             else:
                 print("Invalid frame index.")
 
@@ -122,6 +94,9 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
                         print(result)
                         start_timestamp = add_seconds(start_timestamp, 4)
 
+
+
+
             elif key == ord(' '):
                 timestamp = seconds_to_hms(current_frame / int(fps))
                 print(f"Current frame timestamp (FFmpeg format): {timestamp}")
@@ -132,4 +107,3 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
 
         # Close the OpenCV window
         cv2.destroyAllWindows()
-
