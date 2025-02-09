@@ -2,6 +2,7 @@ import tempfile
 import os
 import cv2
 import subprocess
+import platform
 from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip, add_seconds
 
 # Global variables
@@ -38,20 +39,20 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
 
         # Initialize the OpenCV window
         cv2.namedWindow("Frame Viewer", cv2.WINDOW_NORMAL)
-        cv2.setWindowProperty('Frame Viewer', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        os_name = platform.system()
+        if os_name == 'Linux':
+            cv2.setWindowProperty('Frame Viewer', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         cv2.setMouseCallback("Frame Viewer", mouse_callback)
-
-
 
         # Function to display the current frame with frame number and total frames overlay
         def show_frame(frame_index):
             if 0 <= frame_index < len(frame_files):
-                frame_path = os.path.join(
-                    temp_dir, frame_files[frame_index])
+                frame_path = os.path.join(temp_dir, frame_files[frame_index])
                 image = cv2.imread(frame_path)
 
                 temp_image = image.copy()
-                
+
+                # Draw the rectangle on the frame if defined
                 if rect_start and rect_end:
                     cv2.rectangle(temp_image, rect_start, rect_end, (0, 255, 0), 2)
 
@@ -61,7 +62,7 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
                 color = (0, 255, 0)  # Green color
                 thickness = 2
                 position = (30, 30)  # Position to place the text
-                image = cv2.putText(
+                temp_image = cv2.putText(
                     temp_image, text, position, font, 1, color, thickness, lineType=cv2.LINE_AA)
 
                 cv2.imshow("Frame Viewer", temp_image)
@@ -121,9 +122,6 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
                         print(result)
                         start_timestamp = add_seconds(start_timestamp, 4)
 
-
-
-
             elif key == ord(' '):
                 timestamp = seconds_to_hms(current_frame / int(fps))
                 print(f"Current frame timestamp (FFmpeg format): {timestamp}")
@@ -134,3 +132,4 @@ def splitter(video_path, fps=4, start=None, nvidia=False):
 
         # Close the OpenCV window
         cv2.destroyAllWindows()
+
