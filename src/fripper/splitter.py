@@ -3,6 +3,7 @@ import os
 import cv2
 import subprocess
 import platform
+import signal
 from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip, add_seconds
 
 
@@ -21,6 +22,7 @@ class VideoSplitter:
         self.rect_start_point = None
         self.rect_end_point = None
         self.drawing = False
+        self.running = True
 
     def setup(self):
         rip_frames(self.video_path, self.temp_dir.name, "frame_%04d.jpg", fps=self.fps, start=self.start)
@@ -65,8 +67,14 @@ class VideoSplitter:
         self.current_frame = val
         self.show_frame(self.current_frame)
 
+    def signal_handler(self, signum, frame):
+        print("Interrupt received, exiting gracefully...")
+        self.running = False
+
     def run(self):
-        while True:
+        signal.signal(signal.SIGINT, self.signal_handler)
+        
+        while self.running:
             key = cv2.waitKeyEx(1)
             if key == ord('q'):
                 break
@@ -96,7 +104,7 @@ class VideoSplitter:
             elif key == ord(' '):
                 timestamp = seconds_to_hms(self.current_frame / int(self.fps))
                 shifted_timestamp = subtract_seconds(timestamp, 1)
-                subprocess.Popen(['fripper', 'split', self.video_path, "--fps", "60", "--start", shifted_timestamp])
+                subprocess.Popen(['frame_analysis', 'split', self.video_path, "--fps", "60", "--start", shifted_timestamp])
             self.show_frame(self.current_frame)
             cv2.setTrackbarPos("Frame", "Frame Viewer", self.current_frame)
         cv2.destroyAllWindows()
