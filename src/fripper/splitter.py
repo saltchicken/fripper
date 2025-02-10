@@ -5,142 +5,106 @@ import subprocess
 import platform
 from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip, add_seconds
 
-start_timestamp = None
-end_timestamp = None
-rect_start_point = None
-rect_end_point = None
-drawing = False
 
-def splitter(video_path, fps=4, start=None, nvidia=False):
-    with tempfile.TemporaryDirectory() as temp_dir:
-        rip_frames(video_path, temp_dir, "frame_%04d.jpg", fps=fps, start=start)
+class VideoSplitter:
+    def __init__(self, video_path, fps=4, start=None, nvidia=False):
+        self.video_path = video_path
+        self.fps = fps
+        self.start = start
+        self.nvidia = nvidia
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.frame_files = []
+        self.total_frames = 0
+        self.current_frame = 0
+        self.start_timestamp = None
+        self.end_timestamp = None
+        self.rect_start_point = None
+        self.rect_end_point = None
+        self.drawing = False
 
-        # List all extracted frame images
-        frame_files = sorted(os.listdir(temp_dir))
-        total_frames = len(frame_files)
+    def setup(self):
+        rip_frames(self.video_path, self.temp_dir.name, "frame_%04d.jpg", fps=self.fps, start=self.start)
+        self.frame_files = sorted(os.listdir(self.temp_dir.name))
+        self.total_frames = len(self.frame_files)
 
-        # Initialize the OpenCV window
         cv2.namedWindow("Frame Viewer", cv2.WINDOW_NORMAL)
         if platform.system() == "Linux":
             cv2.setWindowProperty("Frame Viewer", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
-        def mouse_callback(event, x, y, flags, param):
-            global rect_start_point, rect_end_point, drawing
+        cv2.setMouseCallback("Frame Viewer", self.mouse_callback)
+        cv2.createTrackbar("Frame", "Frame Viewer", 0, self.total_frames - 1, self.on_trackbar)
+        self.show_frame(self.current_frame)
 
-            if event == cv2.EVENT_LBUTTONDOWN:
-                # When the left mouse button is pressed, record the start point
-                rect_start_point = (x, y)
-                drawing = True
+    def mouse_callback(self, event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            self.rect_start_point = (x, y)
+            self.drawing = True
+        elif event == cv2.EVENT_MOUSEMOVE and self.drawing:
+            self.rect_end_point = (x, y)
+            self.show_frame(self.current_frame)
+        elif event == cv2.EVENT_LBUTTONUP:
+            self.rect_end_point = (x, y)
+            self.drawing = False
+            self.show_frame(self.current_frame)
 
+    def show_frame(self, frame_index):
+        if 0 <= frame_index < len(self.frame_files):
+            frame_path = os.path.join(self.temp_dir.name, self.frame_files[frame_index])
+            image = cv2.imread(frame_path)
 
-            elif event == cv2.EVENT_MOUSEMOVE:
-                # While the mouse is moving and drawing is in progress, update the end point
-                if drawing:
-                    rect_end_point = (x, y)
-                    show_frame(current_frame)
+            if self.rect_start_point and self.rect_end_point:
+                cv2.rectangle(image, self.rect_start_point, self.rect_end_point, (0, 255, 0), 2)
 
-            elif event == cv2.EVENT_LBUTTONUP:
-                # When the left mouse button is released, finalize the rectangle
-                rect_end_point = (x, y)
-                drawing = False
-                show_frame(current_frame)
+            text = f"Frame: {frame_index + 1}/{self.total_frames}"
+            image = cv2.putText(image, text, (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+            cv2.imshow("Frame Viewer", image)
+        else:
+            print("Invalid frame index.")
 
+    def on_trackbar(self, val):
+        self.current_frame = val
+        self.show_frame(self.current_frame)
 
-        def show_frame(frame_index):
-            global rect_start_point, rect_end_point
-
-            if 0 <= frame_index < len(frame_files):
-                frame_path = os.path.join(temp_dir, frame_files[frame_index])
-                image = cv2.imread(frame_path)
-
-                # Draw the rectangle if defined
-                if rect_start_point and rect_end_point:
-                    cv2.rectangle(image, rect_start_point, rect_end_point, (0, 255, 0), 2)
-
-                # Overlay the current frame number and total frames on the image
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                text = f"Frame: {frame_index + 1}/{total_frames}"
-                color = (0, 255, 0)  # Green color
-                thickness = 2
-                position = (30, 30)  # Position to place the text
-                image = cv2.putText(image, text, position, font, 1, color, thickness, lineType=cv2.LINE_AA)
-
-                cv2.imshow("Frame Viewer", image)
-            else:
-                print("invalid frame index.")
-
-        cv2.setMouseCallback("Frame Viewer", mouse_callback)
-
-        current_frame = 0
-        show_frame(current_frame)
-
-        def on_trackbar(val):
-            nonlocal current_frame
-            current_frame = val
-            show_frame(current_frame)
-
-        cv2.createTrackbar("Frame", "Frame Viewer", 0,
-                            total_frames - 1, on_trackbar)
-
+    def run(self):
         while True:
             key = cv2.waitKeyEx(1)
-
             if key == ord('q'):
                 break
-            if key == 2424832:
-                current_frame = max(current_frame - 1, 0)
-                show_frame(current_frame)
-                cv2.setTrackbarPos("Frame", "Frame Viewer",
-                                    current_frame)  # Update slider
+            elif key == 2424832:
+                self.current_frame = max(self.current_frame - 1, 0)
             elif key == 2555904:
-                current_frame = min(current_frame + 1,
-                                    len(frame_files) - 1)
-                show_frame(current_frame)
-                cv2.setTrackbarPos("Frame", "Frame Viewer", current_frame)
+                self.current_frame = min(self.current_frame + 1, self.total_frames - 1)
             elif key == ord('s'):
-                timestamp = seconds_to_hms(current_frame / int(fps)) 
-                if start:
-                    timestamp = add_timestamps(timestamp, start)
-                if rect_start_point and rect_end_point:
-                    grab_frame(video_path, timestamp, crop=[rect_start_point, rect_end_point])
-                else:
-                    grab_frame(video_path, timestamp)
+                timestamp = seconds_to_hms(self.current_frame / int(self.fps))
+                if self.start:
+                    timestamp = add_timestamps(timestamp, self.start)
+                grab_frame(self.video_path, timestamp, crop=[self.rect_start_point, self.rect_end_point] if self.rect_start_point and self.rect_end_point else None)
             elif key == ord('['):
-                start_timestamp = seconds_to_hms(current_frame / int(fps)) 
-                print(f"Start time_stamp: {start_timestamp}")
+                self.start_timestamp = seconds_to_hms(self.current_frame / int(self.fps))
+                print(f"Start timestamp: {self.start_timestamp}")
             elif key == ord(']'):
-                end_timestamp = seconds_to_hms(current_frame / int(fps))
-                print(f"End time_stamp: {end_timestamp}")
-            elif key == ord('c'):
-                # TODO: Add check to see if end_timestamp is greater than start_timestamp
-                if start_timestamp and end_timestamp:
-                    if rect_start_point and rect_end_point:
-                        result = get_clip(video_path, start_timestamp, end_timestamp, crop=[rect_start_point, rect_end_point])
-                        print(result)
-                    else:
-                        result = get_clip(video_path, start_timestamp, end_timestamp)
-                        print(result)
-                else:
-                    print("Please select a starting and ending timestamp using the '[' and ']' keys.")
-            elif key == ord('o'):
-                print("Running overlap")
-                if start_timestamp:
-                    for i in range(20):
-                        print(start_timestamp)
-                        result = get_clip(video_path, start_timestamp, add_seconds(start_timestamp, 5))
-                        print(result)
-                        start_timestamp = add_seconds(start_timestamp, 4)
-
-
-
-
+                self.end_timestamp = seconds_to_hms(self.current_frame / int(self.fps))
+                print(f"End timestamp: {self.end_timestamp}")
+            elif key == ord('c') and self.start_timestamp and self.end_timestamp:
+                result = get_clip(self.video_path, self.start_timestamp, self.end_timestamp, crop=[self.rect_start_point, self.rect_end_point] if self.rect_start_point and self.rect_end_point else None)
+                print(result)
+            elif key == ord('o') and self.start_timestamp:
+                for _ in range(20):
+                    result = get_clip(self.video_path, self.start_timestamp, add_seconds(self.start_timestamp, 5))
+                    print(result)
+                    self.start_timestamp = add_seconds(self.start_timestamp, 4)
             elif key == ord(' '):
-                timestamp = seconds_to_hms(current_frame / int(fps))
-                print(f"Current frame timestamp (FFmpeg format): {timestamp}")
-
-                #TODO: Hacky solution
+                timestamp = seconds_to_hms(self.current_frame / int(self.fps))
                 shifted_timestamp = subtract_seconds(timestamp, 1)
-                subprocess.Popen(['frame_analysis', 'split', video_path, "--fps", "60", "--start", shifted_timestamp])
-
-        # Close the OpenCV window
+                subprocess.Popen(['fripper', 'split', self.video_path, "--fps", "60", "--start", shifted_timestamp])
+            self.show_frame(self.current_frame)
+            cv2.setTrackbarPos("Frame", "Frame Viewer", self.current_frame)
         cv2.destroyAllWindows()
+        self.temp_dir.cleanup()
+
+
+# Example Usage
+# splitter = VideoSplitter("path/to/video.mp4", fps=4, start=None, nvidia=False)
+# splitter.setup()
+# splitter.run()
+

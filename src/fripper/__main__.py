@@ -1,6 +1,6 @@
 import argparse
 import sys
-from .splitter import splitter
+from .splitter import VideoSplitter
 from .preview import preview_frame, preview_thumbnails
 from .ffmpeg_cmd import grab_frame, grab_thumbnails
 
@@ -33,7 +33,9 @@ def main():
     if args.command == "split":
         if args.nvidia:
             print("Using NVIDIA acceleration")
-        splitter(args.video_path, fps=args.fps, start=args.start, nvidia=args.nvidia)
+        splitter = VideoSplitter(args.video_path, fps=args.fps, start=args.start, nvidia=args.nvidia)
+        splitter.setup()
+        splitter.run()
     elif args.command == "grab":
         if args.thumbnails:
             grab_thumbnails(args.video_path)
