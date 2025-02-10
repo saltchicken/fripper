@@ -240,7 +240,6 @@ def get_clip(video_path, start_timestamp, end_timestamp, output_directory=None, 
         print(f"{command=}")
     else:
         print(f"{command=}")
-    print(command)
 
     try:
         result = subprocess.run(
