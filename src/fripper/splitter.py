@@ -104,7 +104,7 @@ class VideoSplitter:
             elif key == ord(' '):
                 timestamp = seconds_to_hms(self.current_frame / int(self.fps))
                 shifted_timestamp = subtract_seconds(timestamp, 1)
-                subprocess.Popen(['frame_analysis', 'split', self.video_path, "--fps", "60", "--start", shifted_timestamp])
+                subprocess.Popen(['fripper', 'split', self.video_path, "--fps", "60", "--start", shifted_timestamp])
             self.show_frame(self.current_frame)
             cv2.setTrackbarPos("Frame", "Frame Viewer", self.current_frame)
         cv2.destroyAllWindows()
