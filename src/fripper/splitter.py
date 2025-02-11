@@ -45,14 +45,29 @@ class VideoSplitter:
             self.rect_end_point = (x, y)
             self.show_frame(self.current_frame)
         elif event == cv2.EVENT_LBUTTONUP:
-            self.rect_end_point = (x, y)
+            if x > self.width:
+                x = self.width
+            elif x < 0:
+                x = 0
+            if y > self.height:
+                y = self.height
+            elif y < 0:
+                y = 0
+
+            x1, y1 = self.rect_start_point
+            x2, y2 = x, y
+
+            self.rect_start_point = (min(x1, x2), min(y1, y2))
+            self.rect_end_point = (max(x1, x2), max(y1, y2))
             self.drawing = False
+            print(f"{self.rect_start_point} {self.rect_end_point}")
             self.show_frame(self.current_frame)
 
     def show_frame(self, frame_index):
         if 0 <= frame_index < len(self.frame_files):
             frame_path = os.path.join(self.temp_dir.name, self.frame_files[frame_index])
             image = cv2.imread(frame_path)
+            self.height, self.width = image.shape[:2]
 
             if self.rect_start_point and self.rect_end_point:
                 cv2.rectangle(image, self.rect_start_point, self.rect_end_point, (0, 255, 0), 2)
