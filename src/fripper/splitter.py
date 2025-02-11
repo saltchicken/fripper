@@ -38,13 +38,20 @@ class VideoSplitter:
         self.show_frame(self.current_frame)
 
     def mouse_callback(self, event, x, y, flags, param):
+        shift_held = flags & cv2.EVENT_FLAG_SHIFTKEY  # Check if Shift is held
         if event == cv2.EVENT_LBUTTONDOWN:
             self.rect_start_point = (x, y)
             self.drawing = True
         elif event == cv2.EVENT_MOUSEMOVE and self.drawing:
-            self.rect_end_point = (x, y)
+            if shift_held:
+                self.rect_end_point = (self.rect_start_point[0] + 512, self.rect_start_point[1] + 512)
+            else:
+                self.rect_end_point = (x, y)
             self.show_frame(self.current_frame)
         elif event == cv2.EVENT_LBUTTONUP:
+            if shift_held:
+                x = self.rect_start_point[0] + 512
+                y = self.rect_start_point[1] + 512
             if x > self.width:
                 x = self.width
             elif x < 0:
