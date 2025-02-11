@@ -105,6 +105,10 @@ class VideoSplitter:
                 timestamp = seconds_to_hms(self.current_frame / int(self.fps))
                 shifted_timestamp = subtract_seconds(timestamp, 1)
                 subprocess.Popen(['fripper', 'split', self.video_path, "--fps", "60", "--start", shifted_timestamp])
+            elif key == ord('d'):
+                self.rect_start_point = None
+                self.rect_end_point = None
+                print("Crop box deleted")
             self.show_frame(self.current_frame)
             cv2.setTrackbarPos("Frame", "Frame Viewer", self.current_frame)
         cv2.destroyAllWindows()
