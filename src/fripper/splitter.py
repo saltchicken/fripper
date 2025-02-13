@@ -4,6 +4,7 @@ import cv2
 import subprocess
 import platform
 import signal
+import threading
 from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip, add_seconds
 
 
@@ -116,8 +117,15 @@ class VideoSplitter:
                 self.end_timestamp = seconds_to_hms(self.current_frame / int(self.fps))
                 print(f"End timestamp: {self.end_timestamp}")
             elif key == ord('c') and self.start_timestamp and self.end_timestamp:
-                result = get_clip(self.video_path, self.start_timestamp, self.end_timestamp, crop=[self.rect_start_point, self.rect_end_point] if self.rect_start_point and self.rect_end_point else None)
-                print(result)
+                def extract_clip():
+                    result = get_clip(self.video_path, self.start_timestamp, self.end_timestamp, 
+                                    crop=[self.rect_start_point, self.rect_end_point] if self.rect_start_point and self.rect_end_point else None)
+                    print(result)
+
+                threading.Thread(target=extract_clip, daemon=True).start()
+
+                # result = get_clip(self.video_path, self.start_timestamp, self.end_timestamp, crop=[self.rect_start_point, self.rect_end_point] if self.rect_start_point and self.rect_end_point else None)
+                # print(result)
             elif key == ord('o') and self.start_timestamp:
                 for _ in range(20):
                     result = get_clip(self.video_path, self.start_timestamp, add_seconds(self.start_timestamp, 5))
