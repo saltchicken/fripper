@@ -25,7 +25,7 @@ class VideoSplitter:
         self.running = True
 
     def setup(self):
-        rip_frames(self.video_path, self.temp_dir.name, "frame_%04d.jpg", fps=self.fps, start=self.start)
+        rip_frames(self.video_path, self.temp_dir.name, "frame_%05d.jpg", fps=self.fps, start=self.start)
         self.frame_files = sorted(os.listdir(self.temp_dir.name))
         self.total_frames = len(self.frame_files)
 

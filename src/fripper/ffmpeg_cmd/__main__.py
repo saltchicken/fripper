@@ -33,7 +33,7 @@ def rip_frames(video_path, output_directory, output_pattern, fps=4, start=None, 
         video_path (str): The path to the input video file to extract frames from.
         output_directory (str): The directory where the extracted frames will be saved.
         output_pattern (str): The filename pattern for the output frames
-                            (e.g., 'frame_%04d.jpg' for sequentially numbered frames).
+                            (e.g., 'frame_%05d.jpg' for sequentially numbered frames).
         fps (int, optional): The frame rate (frames per second) at which to extract frames.
                              Defaults to 4.
         nvidia (bool, optional): Whether to use NVIDIA CUDA hardware acceleration for
@@ -48,7 +48,7 @@ def rip_frames(video_path, output_directory, output_pattern, fps=4, start=None, 
         Exception: For any other unexpected errors.
 
     Example:
-        >>> rip_frames("video.mp4", "output_frames", "frame_%04d.jpg", fps=5)
+        >>> rip_frames("video.mp4", "output_frames", "frame_%05d.jpg", fps=5)
         Frames extracted to: output_frames
 
     Notes:
