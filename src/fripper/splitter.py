@@ -55,7 +55,7 @@ class VideoSplitter:
         self.frame_files = sorted(os.listdir(self.temp_dir.name))
         self.total_frames = len(self.frame_files)
         if is_image(self.video_path):
-            total_frames = 2
+            self.total_frames = 2
 
         cv2.namedWindow("Frame Viewer", cv2.WINDOW_NORMAL)
         if platform.system() == "Linux":
