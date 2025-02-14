@@ -7,10 +7,21 @@ import signal
 import threading
 import imghdr
 import shutil
+from PIL import Image
 from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip, add_seconds
 
 def is_image(file_path):
     return imghdr.what(file_path) is not None
+
+def crop_image(image_path, top_left, bottom_right):
+    img = Image.open(image_path)
+
+    crop_box = (top_left[0], top_left[1], bottom_right[0], bottom_right[1])
+
+    cropped_img = img.crop(crop_box)
+    basename = os.path.splitext(os.path.basename(image_path))[0]
+
+    cropped_img.save(basename + "_cropped.png")  # Save the cropped image
 
 class VideoSplitter:
     def __init__(self, video_path, fps=4, start=None, nvidia=False):
@@ -120,10 +131,18 @@ class VideoSplitter:
             elif key == 2555904:
                 self.current_frame = min(self.current_frame + 1, self.total_frames - 1)
             elif key == ord('s'):
-                timestamp = seconds_to_hms(self.current_frame / int(self.fps))
-                if self.start:
-                    timestamp = add_timestamps(timestamp, self.start)
-                grab_frame(self.video_path, timestamp, crop=[self.rect_start_point, self.rect_end_point] if self.rect_start_point and self.rect_end_point else None)
+                if not is_image(self.video_path):
+                    timestamp = seconds_to_hms(self.current_frame / int(self.fps))
+                    if self.start:
+                        timestamp = add_timestamps(timestamp, self.start)
+                    grab_frame(self.video_path, timestamp, crop=[self.rect_start_point, self.rect_end_point] if self.rect_start_point and self.rect_end_point else None)
+                else:
+                    if self.rect_start_point and self.rect_end_point:
+                        crop_image(self.video_path, self.rect_start_point, self.rect_end_point)
+                    else:
+                        print("No crop box for image, skipping")
+
+
             elif key == ord('['):
                 self.start_timestamp = seconds_to_hms(self.current_frame / int(self.fps))
                 print(f"Start timestamp: {self.start_timestamp}")
