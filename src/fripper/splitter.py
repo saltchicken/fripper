@@ -5,8 +5,12 @@ import subprocess
 import platform
 import signal
 import threading
+import imghdr
+import shutil
 from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip, add_seconds
 
+def is_image(file_path):
+    return imghdr.what(file_path) is not None
 
 class VideoSplitter:
     def __init__(self, video_path, fps=4, start=None, nvidia=False):
@@ -26,7 +30,17 @@ class VideoSplitter:
         self.running = True
 
     def setup(self):
-        rip_frames(self.video_path, self.temp_dir.name, "frame_%05d.jpg", fps=self.fps, start=self.start)
+        if not is_image(self.video_path):
+            print("its a video")
+            rip_frames(self.video_path, self.temp_dir.name, "frame_%05d.jpg", fps=self.fps, start=self.start)
+        else:
+            print("Its an image")
+            try:
+                shutil.copy(self.video_path, self.temp_dir.name)
+                print("Image file opened")
+            except Exception as e:
+                print(f"Error occurred: {e}")
+
         self.frame_files = sorted(os.listdir(self.temp_dir.name))
         self.total_frames = len(self.frame_files)
 
