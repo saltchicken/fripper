@@ -49,6 +49,7 @@ class VideoSplitter:
             try:
                 shutil.copy(self.video_path, self.temp_dir.name)
                 print("Image file opened")
+                self.total_frames = 1
             except Exception as e:
                 print(f"Error occurred: {e}")
 
