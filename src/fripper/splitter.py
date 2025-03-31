@@ -161,6 +161,12 @@ class VideoSplitter:
 
                 # result = get_clip(self.video_path, self.start_timestamp, self.end_timestamp, crop=[self.rect_start_point, self.rect_end_point] if self.rect_start_point and self.rect_end_point else None)
                 # print(result)
+            elif key == ord('t') and self.start_timestamp:
+                def extract_clip():
+                    result = get_frame_count(self.video_path, self.start_timestamp, 33, fps=16, crop=[self.rect_start_point, self.rect_end_point] if self.rect_start_point and self.rect_end_point else None)
+
+                    print(result)
+                threading.Thread(target=extract_clip, daemon=True).start()
             elif key == ord('o') and self.start_timestamp:
                 for _ in range(20):
                     result = get_clip(self.video_path, self.start_timestamp, add_seconds(self.start_timestamp, 5))

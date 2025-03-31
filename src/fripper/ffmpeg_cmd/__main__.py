@@ -251,6 +251,64 @@ def get_clip(video_path, start_timestamp, end_timestamp, output_directory=None, 
     return True
 
 
+def get_frame_count(video_path, start_timestamp, num_frames, fps=16, output_directory=None, crop=None):
+    # TODO: Validate timestamp
+    video_filename = os.path.splitext(os.path.basename(video_path))[0]
+    video_extension = os.path.splitext(os.path.basename(video_path))[1]
+    timestamp_str = start_timestamp.replace(":", "-").replace(".", "-")
+
+    clip_duration = 1 / fps * num_frames
+    print(f"Clip duration: {clip_duration} ----- 1 / {fps} * {num_frames}")
+
+    if output_directory:
+        is_path_valid(output_directory)
+        output_video_path = os.path.join(
+            output_directory, f"{video_filename}_{timestamp_str}{video_extension}"
+        )
+    else:
+        output_video_path = os.path.join(
+            os.getcwd(), f"{video_filename}_{timestamp_str}{video_extension}"
+        )
+    print(output_directory)
+    print(output_video_path)
+    command = [
+        "ffmpeg",
+        "-i",
+        video_path,
+        "-ss",
+        start_timestamp,
+        "-t",
+        str(clip_duration),
+        "-c:v",
+        "libx264",
+        "-c:a",
+        "aac",
+        "-strict",
+        "experimental",
+        output_video_path,
+        "-y",
+    ]
+
+    if crop:
+        width = crop[1][0] - crop[0][0]
+        height = crop[1][1] - crop[0][1]
+        x = crop[0][0]
+        y = crop[0][1]
+        print(f"{width=} : {height=} : {x=} : {y=}")
+        command.insert(len(command) - 2, "-vf")
+        command.insert(len(command) - 2, f"crop={width}:{height}:{x}:{y}")
+        print(f"{command=}")
+    else:
+        print(f"{command=}")
+
+    try:
+        result = subprocess.run(
+            command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred: {e.stderr.decode()}")
+
+    return True
 
 
 
