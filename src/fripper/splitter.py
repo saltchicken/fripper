@@ -8,7 +8,7 @@ import threading
 import imghdr
 import shutil
 from PIL import Image
-from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip, add_seconds
+from .ffmpeg_cmd import rip_frames, grab_frame, seconds_to_hms, subtract_seconds, add_timestamps, get_clip, add_seconds, get_frame_count
 
 def is_image(file_path):
     return imghdr.what(file_path) is not None
